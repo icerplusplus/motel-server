@@ -10,9 +10,6 @@ export const dbOptions: TypeOrmModuleOptions = {
   password: DATABASE.DB_PASSWORD,
   database: DATABASE.DB_NAME,
   entities: [join(__dirname, '../**', '*.entity.{ts,js}')],
-  extra: {
-    trustServerCertificate: true,
-  },
   synchronize: true,
   autoLoadEntities: true,
 };

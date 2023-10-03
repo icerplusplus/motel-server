@@ -1,17 +1,14 @@
-FROM node:18-alpine AS install-dependencies
+FROM node:20-alpine
 
-WORKDIR /user/src/app
+WORKDIR /app
 
-RUN npm install -g npm@9.5.0
+RUN npm install -g @nestjs/cli --force
 
-COPY node_modules .
-
-COPY package.json ./
-
-# RUN npm i
+COPY package*.json ./
 
 COPY . .
 
-RUN npm run build
+RUN npm install --force
 
-CMD ["npm", "run", "start:prod"]
+RUN npm run build --force
+CMD ["npm", "run", "start:dev"]

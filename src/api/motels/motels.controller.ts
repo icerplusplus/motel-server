@@ -32,18 +32,18 @@ export class MotelsController {
 
   // create
   @Post()
-  @UseInterceptors(FilesInterceptor('thumbnails', 20, multerOptions))
+  // @UseInterceptors(FilesInterceptor('thumbnails', 20, multerOptions))
   async create(
     @Body() createMotelDto: CreateMotelDto,
-    @UploadedFiles() files: Array<Express.Multer.File>,
+    // @UploadedFiles() files: Array<Express.Multer.File>,
   ) {
-    // Get image files
-    const imageList = await this.filesService.uploadMutipleFiles(files);
-    // Map to get image path
-    const thumbnails = imageList.map?.((image) => image.path);
-    // Filter properties of Product entity and response
+    // // Get image files
+    // const imageList = await this.filesService.uploadMutipleFiles(files);
+    // // Map to get image path
+    // const thumbnails = imageList.map?.((image) => image.path);
+    // // Filter properties of Product entity and response
 
-    return await this.motelsService.create({ ...createMotelDto, thumbnails });
+    return await this.motelsService.create(createMotelDto);
   }
 
   // update
