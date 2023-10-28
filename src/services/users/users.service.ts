@@ -5,6 +5,7 @@ import { UserEntity } from '@/shared/entities';
 import { CreateUserParams, UpdateUserParams } from '@/shared/dtos';
 import { Pagination } from '@/shared/utils/type';
 import { userDisplay } from '@/shared/utils/function.global';
+import { Roles } from '@/shared/utils/variables';
 
 @Injectable()
 export class UserCoreService {
@@ -13,6 +14,14 @@ export class UserCoreService {
     private readonly userRepository: Repository<UserEntity>,
   ) {}
 
+  async findByAdminAccount(phoneNumber: string) {
+    return await this.userRepository.findOne({
+      where: {
+        phoneNumber,
+        role: Roles.ADMIN,
+      },
+    });
+  }
   async findByToken(token: string) {
     return await this.userRepository.findOne({
       where: {
@@ -65,14 +74,14 @@ export class UserCoreService {
     const user = await this.userRepository.findOne({
       where: { phoneNumber },
     });
-    return userDisplay(user);
+    return user;
   }
 
   async update(id: string, updateUserParams: UpdateUserParams) {
     const findUser = await this.findById(id);
     const user = await this.userRepository.save({
       ...findUser,
-      updateUserParams,
+      ...updateUserParams,
     });
 
     return userDisplay(user);

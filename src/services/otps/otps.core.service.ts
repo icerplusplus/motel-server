@@ -36,6 +36,12 @@ export class OtpsCoreService {
 
   // Find otp
   async findByPhone(phoneNumber: string) {
-    return await this.otpRepo.findOneBy({ phoneNumber });
+    const latestOtp = await this.otpRepo.find({
+      where: { phoneNumber },
+      order: { CreatedAt: 'DESC' },
+    });
+
+    if (!latestOtp || latestOtp.length === 0) return null;
+    return latestOtp[0];
   }
 }

@@ -1,6 +1,7 @@
-import { Column, Entity } from 'typeorm';
+import { Column, Entity, OneToMany } from 'typeorm';
 import { BaseEntity } from './base.entity';
 import { DATABASE, Roles } from '../utils/variables';
+import { OrderEntity } from './order.entity';
 
 @Entity({ name: 'users', database: DATABASE.DB_NAME })
 export class UserEntity extends BaseEntity {
@@ -65,4 +66,7 @@ export class UserEntity extends BaseEntity {
     default: null,
   })
   token: string;
+
+  @OneToMany(() => OrderEntity, (order) => order.user)
+  orders: OrderEntity[];
 }

@@ -11,7 +11,7 @@ import { FilesService } from '@/services/files/files.service';
 import { LocalAuthGuard, RefreshTokenGuard, RolesGuard } from '@/shared/guards';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { multerOptions } from '@/shared/configs/multer.config';
-import { CreateOtpDto, CreateUserDto } from '@/shared/dtos';
+import { AdminLoginDto, CreateOtpDto, CreateUserDto } from '@/shared/dtos';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { Roles as RolesEnum } from '@/shared/utils/variables';
 import { Roles } from '@/shared/decorators';
@@ -30,6 +30,12 @@ export class AuthsController {
     return await this.authsService.login(req.user);
   }
 
+  @Post('admin-login')
+  @UseGuards(LocalAuthGuard)
+  async loginWithAdminAccount(@Body() body: AdminLoginDto) {
+    return await this.authsService.adminLogin(body);
+  }
+
   @Post('register')
   @UseInterceptors(FileInterceptor('avatar', multerOptions)) // validate, filter file
   async register(
@@ -45,6 +51,7 @@ export class AuthsController {
 
   @Post('register-with-phone-number')
   async registerWithPhoneNumber(@Body() body: { phoneNumber: string }) {
+    console.log('body: ', body);
     return await this.authsService.registerWithPhoneNumber(body.phoneNumber);
   }
 

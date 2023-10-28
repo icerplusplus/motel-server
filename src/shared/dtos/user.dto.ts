@@ -81,7 +81,10 @@ export class CreateUserDto {
   @IsStrongPassword()
   password: string;
 
-  @ApiProperty()
+  @ApiProperty({ type: String })
+  @IsNotEmpty({ message: 'Số điện thoại không được để trống' })
+  @IsPhoneNumber('VN', { message: 'Số điện thoại không đúng định dạng' })
+  @Transform(({ value }) => value.replace(/\D/g, '')) // remove all character except number
   @Expose()
   phoneNumber: string;
 
@@ -130,3 +133,18 @@ export type UpdateUserDto = Partial<{
 }>;
 export type UpdateUserParams = UpdateUserDto;
 export type RefreshParams = Partial<UserDto>;
+
+export class AdminLoginDto {
+  @ApiProperty()
+  @IsNotEmpty()
+  @MinLength(8)
+  @IsStrongPassword()
+  password: string;
+
+  @ApiProperty({ type: String })
+  @IsNotEmpty({ message: 'Số điện thoại không được để trống' })
+  @IsPhoneNumber('VN', { message: 'Số điện thoại không đúng định dạng' })
+  @Transform(({ value }) => value.replace(/\D/g, '')) // remove all character except number
+  @Expose()
+  phoneNumber: string;
+}

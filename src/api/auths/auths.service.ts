@@ -1,6 +1,7 @@
 import { OtpsCoreService } from '@/services/otps/otps.core.service';
 import { UserCoreService } from '@/services/users/users.service';
 import {
+  AdminLoginDto,
   CreateOtpDto,
   CreateUserParams,
   RefreshParams,
@@ -20,6 +21,7 @@ import {
   BadRequestException,
   Injectable,
   InternalServerErrorException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
@@ -32,9 +34,47 @@ export class AuthsService {
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
   ) {}
+  async adminLogin(data: AdminLoginDto) {
+    const admin = await this.userService.findByAdminAccount(data.phoneNumber);
+    if (!admin)
+      throw new ForbiddenException('Tài khoản không có quyền đăng nhập!');
+    // generate JWT token
+    // access token
+    const accessToken = await this.jwtService.signAsync(
+      {
+        ID: admin.ID,
+        phoneNumber: admin.phoneNumber,
+        role: admin.role,
+      },
+      {
+        secret: this.configService.get('JWT_SECRET'),
+        expiresIn: this.configService.get('ACCESS_TOKEN_EXPIRES_IN'),
+      },
+    );
 
+    // refresh token
+    const refreshToken = await this.jwtService.signAsync(
+      { ID: admin.ID, phoneNumber: admin.phoneNumber, role: admin.role },
+      {
+        secret: this.configService.get('JWT_SECRET'),
+        expiresIn: this.configService.get<string>('REFRESH_TOKEN_EXPIRES_IN'),
+      },
+    );
+    const updateUser = await this.userService.update(admin.ID, {
+      token: refreshToken,
+    });
+    return {
+      ...userWithoutPasswordField(updateUser),
+      accessToken,
+      refreshToken,
+    };
+  }
   async login(user: Partial<UserDto>) {
-    const payload = { email: user.email, sub: user.ID, role: user.role };
+    const payload = {
+      phoneNumber: user.phoneNumber,
+      sub: user.ID,
+      role: user.role,
+    };
 
     // generate JWT token
     // access token
@@ -53,10 +93,18 @@ export class AuthsService {
 
     if (findUser) {
       // TODO: Save refresh token to database
-      await this.userService.update(findUser.ID, { token: refreshToken });
+      const rs = await this.userService.update(findUser.ID, {
+        token: refreshToken,
+      });
+      if (rs)
+        return {
+          ...userWithoutPasswordField(rs),
+          accessToken,
+          refreshToken,
+        };
     }
     return {
-      ...user,
+      ...userWithoutPasswordField(findUser),
       accessToken,
       refreshToken,
     };
@@ -162,7 +210,7 @@ export class AuthsService {
       throw new BadRequestException('Số điện thoại đã được đăng ký');
 
     return {
-      status: 200,
+      statusCode: 200,
       message: 'Bạn có 5 phút để nhập mã OTP',
     };
   }
@@ -188,13 +236,14 @@ export class AuthsService {
         'Đã xảy ra lỗi trong quá trình khởi tạo OTP',
       );
 
-    return { status: 200, otp: newOtp };
+    return { statusCode: 200, otp: newOtp };
   }
 
   async verifyOtp(createOtpDto: CreateOtpDto) {
     const isOtpExist = await this.otpService.findByPhone(
       createOtpDto.phoneNumber,
     );
+
     if (!isOtpExist)
       throw new BadRequestException('Mã xác thực OTP không chính xác!');
 
@@ -204,25 +253,38 @@ export class AuthsService {
       throw new BadRequestException('Mã xác thực OTP không chính xác!');
 
     return {
+      statusCode: 200,
       confirm: true,
+      message: 'OK',
     };
   }
 
   async refresh(payloadParams: RefreshParams) {
     // TODO: generate new access token
-    const { ID, email, role } = payloadParams;
+    const { ID, phoneNumber, role } = payloadParams;
 
     // TODO: something...
     return {
       accessToken: await this.jwtService.signAsync(
         {
           ID,
-          email,
+          phoneNumber,
           role,
         },
         {
           secret: this.configService.get('JWT_SECRET'),
           expiresIn: this.configService.get('ACCESS_TOKEN_EXPIRES_IN'),
+        },
+      ),
+      refreshToken: await this.jwtService.signAsync(
+        {
+          ID,
+          phoneNumber,
+          role,
+        },
+        {
+          secret: this.configService.get('JWT_SECRET'),
+          expiresIn: this.configService.get<string>('REFRESH_TOKEN_EXPIRES_IN'),
         },
       ),
     };

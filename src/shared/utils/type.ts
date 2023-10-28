@@ -1,4 +1,5 @@
-import { TypeArea, TypePrice } from './variables';
+import { OrderEntity } from '../entities';
+import { MessageContentType, Roles, TypeArea, TypePrice } from './variables';
 
 export interface Pagination {
   page: number;
@@ -29,6 +30,11 @@ export interface LocationType {
   longitude: number;
 }
 
+export interface Category extends BaseType {
+  name: string;
+  motels: Motel[];
+}
+
 export interface Motel extends BaseType {
   title: string;
   description: string;
@@ -48,4 +54,30 @@ export interface Motel extends BaseType {
   closeTime: number;
   comments?: any[];
   owner?: any;
+}
+
+export interface UserType extends BaseType {
+  fullname: string;
+  email: string;
+  password: string;
+  phoneNumber: string;
+  address: string;
+  birthDate: string;
+  gender: string;
+  avatar: string;
+  role: string;
+  token: string;
+  orders: OrderEntity[];
+}
+
+export interface Message extends BaseType {
+  // conversation: Conversation;
+  content: string;
+  sender: UserType;
+  type:
+    | MessageContentType.audio
+    | MessageContentType.image
+    | MessageContentType.file
+    | MessageContentType.sticker
+    | MessageContentType.text;
 }

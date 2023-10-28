@@ -4,6 +4,8 @@ import { MotelDetailsCoreModule } from './motel-details/motel-details.core.modul
 import { FilesModule } from './files/files.module';
 import { UsersCoreModule } from './users/users.module';
 import { OtpsCoreModule } from './otps/otps.core.module';
+import { CategoriesCoreModule } from './categories/categories.module';
+import { OrdersCoreModule } from './orders/orders.module';
 
 const coreModules = [
   MotelsCoreModule,
@@ -11,6 +13,8 @@ const coreModules = [
   FilesModule,
   UsersCoreModule,
   OtpsCoreModule,
+  CategoriesCoreModule,
+  OrdersCoreModule,
 ];
 @Module({
   imports: [...coreModules],

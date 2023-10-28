@@ -10,10 +10,10 @@ export const encode = async (content: string): Promise<string> => {
 
 export const passwordCompare = (
   plainText: string,
-  contentCpmpare: string,
-): Promise<boolean> => bcrypt.compare(plainText, contentCpmpare);
+  contentCompare: string,
+): Promise<boolean> => bcrypt.compare(plainText, contentCompare);
 
 export const compare = (
   plainText: string,
-  contentCpmpare: string,
-): Promise<boolean> => bcrypt.compare(plainText, contentCpmpare);
+  contentCompare: string,
+): Promise<boolean> => bcrypt.compare(plainText, contentCompare);

@@ -11,8 +11,13 @@ import {
   UseInterceptors,
   UploadedFiles,
 } from '@nestjs/common';
-import { CreateMotelDto, SearchRooms, UpdateMotelDto } from '@/shared/dtos';
-import { LocationType, Pagination } from '@/shared/utils/type';
+import {
+  CreateMotelDto,
+  SearchByOwnerDto,
+  SearchRooms,
+  UpdateMotelDto,
+} from '@/shared/dtos';
+import { Pagination } from '@/shared/utils/type';
 import { MotelsService } from './motels.service';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { FilesService } from '@/services/files/files.service';
@@ -27,55 +32,65 @@ export class MotelsController {
   // find rooms by user'location
   @Post('find-rooms-by-location')
   async findRoomByLocation(@Body() body: SearchRooms) {
-    return await this.motelsService.findRoomsByLocation(body);
+    const rooms = await this.motelsService.findRoomsByLocation(body);
+    return { statusCode: 200, message: 'OK', data: rooms };
   }
 
-  // create
-  @Post()
-  // @UseInterceptors(FilesInterceptor('thumbnails', 20, multerOptions))
-  async create(
-    @Body() createMotelDto: CreateMotelDto,
-    // @UploadedFiles() files: Array<Express.Multer.File>,
-  ) {
-    // // Get image files
-    // const imageList = await this.filesService.uploadMutipleFiles(files);
-    // // Map to get image path
-    // const thumbnails = imageList.map?.((image) => image.path);
-    // // Filter properties of Product entity and response
-
-    return await this.motelsService.create(createMotelDto);
+  @Post('find-by-owner-id')
+  async findByOwnerId(@Body() body: SearchByOwnerDto) {
+    const posts = await this.motelsService.findByOwnerId(body.ownerId, {
+      page: body.page,
+      size: body.size,
+    });
+    return { statusCode: 200, message: 'OK', data: posts };
   }
 
-  // update
-  @Put()
+  @Post('upload-images')
   @UseInterceptors(FilesInterceptor('thumbnails', 20, multerOptions))
-  async update(
-    updateMotelDto: UpdateMotelDto,
-    @UploadedFiles() files: Array<Express.Multer.File>,
-  ) {
+  async uploadImages(@UploadedFiles() files: Array<Express.Multer.File>) {
     // Get image files
     const imageList = await this.filesService.uploadMutipleFiles(files);
     // Map to get image path
     const thumbnails = imageList.map?.((image) => image.path);
+    // Filter properties of Product entity and response
 
-    return await this.motelsService.update({ ...updateMotelDto, thumbnails });
+    return { statusCode: 200, message: 'OK', data: thumbnails };
+  }
+
+  // create
+  @Post()
+  async create(@Body() createMotelDto: CreateMotelDto) {
+    const newMotel = await this.motelsService.create(createMotelDto);
+    return { statusCode: 200, message: 'OK', data: newMotel };
+  }
+
+  // update
+  @Put()
+  async update(updateMotelDto: UpdateMotelDto) {
+    const updatedMotel = await this.motelsService.update({
+      ...updateMotelDto,
+    });
+    return { statusCode: 200, message: 'OK', data: updatedMotel };
   }
 
   // delete
   @Delete(':id')
   async delete(@Param('id', ParseUUIDPipe) id: string) {
-    return await this.motelsService.softDelete(id);
+    const result = await this.motelsService.softDelete(id);
+    return { statusCode: 200, message: 'OK', data: result.affected === 1 };
   }
 
   // find by id
-  @Post(':id')
-  async findById(@Body() body) {
-    return await this.motelsService.findById(body.id);
+  @Get(':id')
+  async findById(@Param('id', ParseUUIDPipe) id: string) {
+    const data = await this.motelsService.findById(id);
+    return { statusCode: 200, message: 'OK', data };
   }
 
   // find and pagination
   @Get()
   async findAndPagination(@Query() paginate: Pagination) {
-    return await this.motelsService.findAndPagination(paginate);
+    const data = await this.motelsService.findAndPagination(paginate);
+    return { statusCode: 200, message: 'OK', data };
   }
 }

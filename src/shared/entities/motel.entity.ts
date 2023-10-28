@@ -3,6 +3,7 @@ import { DATABASE, TypeArea, TypePrice } from '../utils/variables';
 import { BaseEntity } from './base.entity';
 import { CommentEntity } from './comment.entity';
 import { UserEntity } from './user.entity';
+import { CategoryEntity } from './category.entity';
 
 @Entity({ name: 'motels', database: DATABASE.DB_NAME })
 export class MotelEntity extends BaseEntity {
@@ -116,4 +117,8 @@ export class MotelEntity extends BaseEntity {
   @ManyToOne(() => UserEntity, (owner) => owner.ID)
   @JoinColumn({ name: 'owner' })
   owner: UserEntity;
+
+  @ManyToOne(() => CategoryEntity, (category) => category.ID)
+  @JoinColumn({ name: 'category' })
+  category: CategoryEntity;
 }

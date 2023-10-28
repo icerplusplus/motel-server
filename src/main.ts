@@ -8,7 +8,7 @@ async function bootstrap() {
 
   // use validator in global
   app.useGlobalPipes(new ValidationPipe());
-
+  app.enableCors();
   await app.listen(SERVER.PORT);
 }
 bootstrap();

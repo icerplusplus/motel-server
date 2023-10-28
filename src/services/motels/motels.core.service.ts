@@ -1,8 +1,13 @@
-import { CreateMotelDto, UpdateMotelDto } from '@/shared/dtos';
+import {
+  CreateMotelDto,
+  CreateMotelParams,
+  UpdateMotelDto,
+  UpdateMotelParams,
+} from '@/shared/dtos';
 import { MotelEntity } from '@/shared/entities';
 import { userWithoutPasswordField } from '@/shared/utils/function.global';
 import { Pagination } from '@/shared/utils/type';
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -14,7 +19,7 @@ export class MotelsCoreService {
   ) {}
 
   // create
-  async create(createMotelDto: CreateMotelDto) {
+  async create(createMotelDto: CreateMotelParams) {
     // TODO: upload thumbnails
     // if (createMotelDto.thumnails && createMotelDto.thumnails.length > 0) {
 
@@ -24,12 +29,8 @@ export class MotelsCoreService {
   }
 
   // update
-  async update(updateMotelDto: UpdateMotelDto) {
-    // TODO: upload thumbnails
-
-    // TODO: update motel detail
-
-    return await this.motelRepo.save(updateMotelDto);
+  async update(updateMotelDto: UpdateMotelParams) {
+    return await this.motelRepo.save({ ...updateMotelDto });
   }
 
   // delete
@@ -43,19 +44,47 @@ export class MotelsCoreService {
       where: {
         ID: id,
       },
-      relations: ['comments', 'owner'],
+      relations: ['comments', 'owner', 'category'],
     });
-
     delete data.owner.password;
     delete data.owner.token;
-
     return data;
   }
 
   // find and pagination
   async findAndPagination(pagination: Pagination) {
     const [list, count] = await this.motelRepo.findAndCount({
-      relations: ['comments', 'owner'],
+      where: {
+        isChecked: true,
+      },
+      relations: ['comments', 'owner', 'category'],
+      order: {
+        CreatedAt: 'DESC',
+      },
+      skip: (pagination.page - 1) * pagination.size,
+      take: pagination.size,
+    });
+
+    return {
+      motels: list.map((motel) => ({
+        ...motel,
+        owner: userWithoutPasswordField(motel.owner),
+      })),
+      pagination: {
+        ...pagination,
+        count,
+      },
+    };
+  }
+
+  async findByUserId(userId: string, pagination: Pagination) {
+    const [list, count] = await this.motelRepo.findAndCount({
+      where: {
+        owner: {
+          ID: userId,
+        },
+      },
+      relations: ['comments', 'owner', 'category'],
       order: {
         CreatedAt: 'DESC',
       },
@@ -77,7 +106,10 @@ export class MotelsCoreService {
 
   async findWithoutPagination() {
     const [list] = await this.motelRepo.findAndCount({
-      relations: ['comments', 'owner'],
+      where: {
+        isChecked: true,
+      },
+      relations: ['comments', 'owner', 'category'],
       order: {
         CreatedAt: 'DESC',
       },
