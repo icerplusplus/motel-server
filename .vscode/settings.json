@@ -1,0 +1,18 @@
+{
+  "sqltools.connections": [
+    {
+      "mysqlOptions": {
+        "authProtocol": "default",
+        "enableSsl": "Disabled"
+      },
+      "previewLimit": 50,
+      "server": "moteldb.cknzmpy7dk0p.ap-southeast-2.rds.amazonaws.com",
+      "port": 3306,
+      "driver": "MariaDB",
+      "database": "motel_db",
+      "username": "admin",
+      "password": "Cuong123",
+      "name": "mariadb"
+    }
+  ]
+}
