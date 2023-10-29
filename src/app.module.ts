@@ -5,6 +5,7 @@ import { ApiModule } from './api/api.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { dbOptions } from '@/shared/configs';
 import { ConfigModule } from '@nestjs/config';
+import { AppService } from './app.service';
 
 @Module({
   imports: [
@@ -26,6 +27,6 @@ import { ConfigModule } from '@nestjs/config';
     ApiModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [AppService],
 })
 export class AppModule {}
