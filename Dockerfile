@@ -1,14 +1,16 @@
-FROM node:20-alpine
+FROM node:18.16.0
 
 WORKDIR /app
 
-RUN npm install -g @nestjs/cli --force
+RUN npm install -g @nestjs/cli
 
-COPY package*.json ./
+COPY package*.json /app/
+
+RUN npm i --force
 
 COPY . .
 
-RUN npm install --force
+EXPOSE 8080
+# RUN npm run build
 
-RUN npm run build --force
 CMD ["npm", "run", "start:dev"]
